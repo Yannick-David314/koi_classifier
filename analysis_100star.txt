@@ -1,0 +1,110 @@
+========================================================================
+1. RUN SUMMARY AND ERROR KINDS
+========================================================================
+rows: 107   stars: 100   succeeded: 104/107 (97.2%)
+class balance (succeeded rows): {'FALSE POSITIVE': 69, 'CONFIRMED': 35}
+
+error_kind histogram:
+  (success)     104   97.2%
+  precheck        3    2.8%
+
+failure messages (first 60 chars, grouped):
+    3x  koi_num_transits is 0
+
+========================================================================
+1b. CADENCE MIXING (was section 10.1 real at scale?)
+========================================================================
+stars whose search returned MORE than one cadence: 21/104 (20.2%)
+cadence sets returned:
+  '1800'             83
+  '60|1800'          21
+rows whose FLUX_ORIGIN was not pdcsap_flux: 0
+
+========================================================================
+2. MEASURED DEPTH vs koi_depth
+========================================================================
+rows with both measured and catalogue depth: 97
+  median relative error : -9.7%
+  mean   relative error : -10.7%   (a systematic offset, if any, shows here)
+  median |relative error|: 10.4%
+  within 15% (the 10-star bar): 67/97 (69.1%)
+  within 25%                  : 84/97 (86.6%)
+  negative depth (no dip found): 1
+
+  |rel err| by catalogue depth:
+    <500 ppm   n= 53  median |err| 9.8%   median signed -9.7%
+    500-1k     n= 13  median |err| 9.6%   median signed -9.6%
+    1k-5k      n=  9  median |err| 6.3%   median signed -3.3%
+    5k-20k     n= 10  median |err| 10.3%   median signed -9.2%
+    >20k       n= 12  median |err| 11.2%   median signed -11.2%
+
+  |rel err| vs duration/period (the section 10.5 continuum):
+    <0.02      n= 55  median |err| 10.6%   median signed -10.5%
+    0.02-0.05  n= 19  median |err| 9.7%   median signed -9.7%
+    0.05-0.10  n= 12  median |err| 9.5%   median signed -5.8%
+    >0.10      n= 11  median |err| 10.5%   median signed -8.8%
+
+  detrend_masked_fraction: median 9.1%, max 100.0%
+
+========================================================================
+3. POINTS PER BIN, MEASURED (section 10.6)
+========================================================================
+estimated before the run (koi_num_transits x bin_width / 29.4 min):
+  p1=0.0  p5=1.2  p25=8.7  p50=23.5  p75=67.4  p95=221.6
+measured:
+  p1=0.0  p5=1.0  p25=5.0  p50=15.5  p75=48.0  p95=217.4
+
+  rows below 4.5 points/bin (the 10-star floor): 25/104 (24.0%)
+  rows below 1.0 points/bin                    : 4/104 (3.8%)
+
+  bins actually populated: median 100.0%, min 32.0%
+  rows with any empty bin: 20/104 (19.2%)
+  n_local_bins (nominal 201): min 123, median 201, max 201
+
+========================================================================
+4. THE THREE SECONDARY VARIANTS (sections 10.2, 10.9)
+========================================================================
+rows where the search was guarded out: 6/104 (5.8%)
+    2x  blanking covers 1.23 of the orbit
+    1x  blanking covers 1.64 of the orbit
+    1x  blanking covers 0.89 of the orbit
+    1x  blanking covers 0.93 of the orbit
+    1x  blanking covers 0.81 of the orbit
+
+variant                       found     zero  med depth  near +/-0.5
+longest run                   75/98       23    170 ppm        29/75
+deepest, any length           75/98       23    200 ppm        28/75
+deepest, >=2 bins             38/98       60    427 ppm        16/38
+
+phase-fraction distribution of detected dips (|frac|):
+  a genuine secondary sits near 0.5; anything else is contamination
+  longest run                0-.1:10  .1-.2:10  .2-.3:11  .3-.4:10  .4-.45:5  .45-.5:29
+  deepest, any length        0-.1:9  .1-.2:9  .2-.3:11  .3-.4:12  .4-.45:6  .45-.5:28
+  deepest, >=2 bins          0-.1:3  .1-.2:2  .2-.3:7  .3-.4:8  .4-.45:2  .45-.5:16
+
+separation by disposition (median depth of detected secondaries, ppm):
+  longest run                CONF: 23/35 found, med 148 | FALS: 52/63 found, med 201
+  deepest, any length        CONF: 23/35 found, med 157 | FALS: 52/63 found, med 280
+  deepest, >=2 bins          CONF: 8/35 found, med 179 | FALS: 30/63 found, med 488
+
+========================================================================
+5. MULTI-PLANET CONTAMINATION CHECK (section 6 hypothesis)
+========================================================================
+rows on multi-KOI stars: 12   on single-KOI stars: 92
+  longest run                multi   found   6/12  near +/-0.5: 0/6
+  longest run                single  found  69/86  near +/-0.5: 29/69
+  deepest, any length        multi   found   6/12  near +/-0.5: 0/6
+  deepest, any length        single  found  69/86  near +/-0.5: 28/69
+  deepest, >=2 bins          multi   found   4/12  near +/-0.5: 0/4
+  deepest, >=2 bins          single  found  34/86  near +/-0.5: 16/34
+
+========================================================================
+6. FEATURE HEALTH (NaN rates on successful rows)
+========================================================================
+  depth              NaN   3/104 ( 2.9%)   median 0.000335996
+  width              NaN   3/104 ( 2.9%)   median 1.3114
+  asymmetry          NaN   3/104 ( 2.9%)   median -5.39109e-06
+  snr                NaN   3/104 ( 2.9%)   median 3.31985
+  odd_even_diff      NaN   2/104 ( 1.9%)   median 3.78348e-05
+  secondary_depth    NaN   6/104 ( 5.8%)   median 0.000112318
+

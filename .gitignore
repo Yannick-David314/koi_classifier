@@ -1,0 +1,26 @@
+# --- environment and caches (machine-specific, regenerable) ---
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# --- downloaded MAST light curves: ~6.8 GB per 1000 stars, fully regenerable ---
+mast_cache/
+
+# --- run logs: development artifacts, and they embed local filesystem paths ---
+*.log
+batch2_timing.txt
+
+# --- intermediate extraction checkpoints from superseded runs ---
+# The final tables (features_1000.csv, features_2000.csv) are tracked; these are
+# partial or superseded snapshots of the same work.
+features_pass1.csv
+features_pass2.csv
+features_checkpoint.csv
+features_1000_before_candfix.csv
+candfix_rows.csv
+
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+desktop.ini
