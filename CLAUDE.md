@@ -1128,3 +1128,99 @@ One option deliberately not taken: making occupancy a *feature*, so the tree cou
 learn to discount sparse rows. At rho = +0.972 with `duration/period`, adding it would
 effectively re-introduce `koi_duration`/`koi_period` into X, which §7.3's drop list
 excludes. It stays a diagnostic.
+
+---
+
+## 11. The feature-set decision, and a correction to §3
+
+### 11.1 §3's characterisation of `koi_depth` was wrong
+
+§3 excludes `koi_depth` on the grounds that it is "produced by the same vetting
+process that produced the labels". **That is not accurate**, and the whole leakage
+argument in §3 rests on it.
+
+`koi_depth`, `koi_impact`, `koi_period` and `koi_duration` are all outputs of the same
+thing: fitting a transit model to the light curve. They are **measurements**, not
+vetting judgements. The vetting judgement is `koi_disposition`, informed by centroid
+offsets, pixel-level diagnostics and follow-up -- and by the `koi_fpflag_*` columns,
+which genuinely *are* the determination and are correctly excluded.
+
+The real reason to exclude `koi_depth` is different and simpler: **it is the validation
+ground truth for the `depth` feature.** Every "measured depth vs koi_depth" comparison
+in §10 depends on `koi_depth` being an independent reference. Feeding it to the model
+would not be reading the answer key; it would be spending the only yardstick.
+
+So the exclusion stands, for a different reason than the one recorded.
+
+### 11.2 The inconsistency that created
+
+Once the provenance argument collapses, `duration_over_period` becomes a problem. It is
+`koi_duration / koi_period`, from the same transit-model fit as `koi_impact`, and it
+was the model's top-ranked feature (+0.1248). Excluding `koi_impact` on provenance
+grounds while keeping `duration_over_period` was not defensible.
+
+### 11.3 What the ablation showed
+
+Five feature sets, paired over the same 25 star-grouped splits (`ablate_features.py`):
+
+```
+configuration                    accuracy         ROC AUC   planets lost
+light-curve only (6)         0.7825 ±0.0134       0.8764        13.3%
+light-curve + dur/period (7) 0.8616 ±0.0132       0.9327         9.0%
+light-curve + both cat (8)   0.8959 ±0.0107       0.9595         7.8%
+catalogue only (2)           0.7748 ±0.0162       0.8552        10.7%
+dur/period alone (1)         0.6881 ±0.0209       0.7964        10.4%
+
+paired differences (accuracy):
+  duration_over_period adds   +0.0792 ± 0.0158   25/25 splits   t = +25.0   REAL
+  koi_impact adds             +0.0342 ± 0.0115   24/25 splits   t = +14.9   REAL
+  light-curve vs catalogue    +0.0077 ± 0.0193   17/25 splits   t =  +2.0   NOISE
+```
+
+**Two findings, one negative and one positive.**
+
+The negative one contradicts this project's stated claim. The README asserted that "the
+light-curve features carry the performance". Six features extracted from four years of
+photometry (0.7825) are **statistically indistinguishable** from two numbers read
+straight out of a catalogue row (0.7748). The claim was false, and it was unfalsifiable
+under the previous feature set because the catalogue-only baseline was a *subset* of
+the model being compared against it.
+
+The positive one is that the families are **complementary, not redundant**: 0.78 and
+0.77 separately, 0.90 together. Light-curve features encode transit shape and depth;
+`duration_over_period` encodes orbital geometry. Neither is sufficient alone.
+
+### 11.4 Decision: light-curve features only
+
+```python
+FEATURES = ['depth', 'width', 'asymmetry', 'snr', 'odd_even_diff', 'secondary_depth']
+```
+
+`duration_over_period` is **removed from the model** and `koi_impact` is **not added**.
+Both remain in the output table as diagnostics, and the ablation above is published as
+a first-class result rather than a footnote.
+
+**The cost is real and is not hidden.** Planets lost rises from 9.0% to 13.3% on the
+25-split mean (12.0% to 20.3% on the reported split). As a deployable tool, the
+8-feature configuration is better, and it stays documented for anyone who has the
+catalogue's transit fit available.
+
+**The reason is that §2's question deserves an answer.** "Can a pre-filter built from
+light-curve features reduce review burden" cannot be answered by a model whose
+top-ranked feature is not a light-curve feature. This configuration answers it. The
+answer is less flattering than the previous numbers and it is the one the project
+actually asked for.
+
+Note what is *not* being claimed: the catalogue's period, epoch and duration remain
+**inputs to the pipeline** -- folding is impossible without them. The claim is only
+that no catalogue quantity is handed to the classifier as a feature, which is what
+makes "light-curve vs catalogue" a genuine comparison.
+
+### 11.5 A defensible line that was considered and rejected
+
+Period and duration are *required* to run the pipeline at all; `koi_impact` requires a
+full Mandel-Agol fit, which is the expensive step a pre-filter exists to avoid. That
+distinction is deployment-grounded rather than provenance-based, and it would justify
+keeping `duration_over_period` while excluding `koi_impact`. It is coherent. It was
+rejected because it leaves the headline claim untested, which is the thing this
+decision was trying to fix.
