@@ -65,9 +65,10 @@ comparison despite being the project's original benchmark.
 | `train_model.py` | trains and saves the final six-feature model |
 | `ablate_features.py` | the feature-family ablation above |
 | `transitcheck_model.joblib` | the trained model (model + feature list + threshold) |
-| `transitCheck_training_ipynb.ipynb` | original Colab training run — **superseded**: it uses the earlier seven-feature set that included `duration_over_period` |
+| `transitCheck_training_ipynb.ipynb` | training and evaluation notebook — six features, executed locally, outputs match `train_model.py` |
 | `analyse_run.py`, `diagnose_depth_bias.py`, `plot_depth_vs_occupancy.py` | analysis and diagnostics |
-| `verify_model.py`, `verify_discrepancies.py` | reproduce the earlier reported metrics and test their significance |
+| `verify_model.py`, `verify_discrepancies.py` | reproduce the earlier seven-feature metrics and test their significance |
+| `rebuild_notebook.py` | regenerates and executes the notebook without Colab |
 | `METHODOLOGY.md` | full writeup: pipeline, model, results, limitations |
 | `CLAUDE.md` | design reasoning and a detailed correction log |
 

@@ -213,8 +213,10 @@ it is the one that answers §1's question.
 
 - **Doubling the data, 1,000 → 2,000 stars.** Mean accuracy 0.858 → 0.862 across 25
   splits. Within noise.
-- **Hyperparameter search**, 32 configurations. Cross-validated score 0.8806 against
-  0.8754 for defaults. Not adopted — the gain does not survive the uncertainty.
+- **Hyperparameter search**, 32 configurations. Cross-validated average precision
+  0.8256 ± 0.0622 against 0.8034 ± 0.0544 for defaults — a gap of +0.0223 against a
+  pooled fold spread of 0.0826, a ratio of 0.27. Not adopted: the gain is not
+  distinguishable from which stars landed in which fold.
 
 ---
 

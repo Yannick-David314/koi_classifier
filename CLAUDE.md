@@ -1224,3 +1224,41 @@ distinction is deployment-grounded rather than provenance-based, and it would ju
 keeping `duration_over_period` while excluding `koi_impact`. It is coherent. It was
 rejected because it leaves the headline claim untested, which is the thing this
 decision was trying to fix.
+
+### 11.6 The catalogue-only baseline was a comparison built so it could not fail
+
+The baseline reported during training was **`duration_over_period` alone** -- one
+column -- described as "the catalogue-only baseline". Two things were wrong with it.
+
+**It tested one column, not the catalogue.** The honest catalogue-only comparison uses
+every catalogue quantity available to the model, which is two columns. The difference
+is not cosmetic:
+
+```
+duration_over_period alone   0.6881 ± 0.0209      <- what was reported as "catalogue-only"
+duration_over_period + koi_impact   0.7748 ± 0.0162   <- the real catalogue baseline
+light-curve features (6)     0.7825 ± 0.0134
+```
+
+The one-column version sits ~9 points below the light-curve model and makes the
+pipeline look decisive. The two-column version is **essentially tied with it**
+(+0.008 ± 0.019, t = 2.0). Same data, opposite conclusion, and the difference is
+entirely in how the baseline was constructed.
+
+**It was scored against the wrong base rate.** It was quoted as "0.63 accuracy against
+a 0.64 base rate". 0.64 is the FALSE POSITIVE share of the *whole dataset*; the test
+set's is **0.6935**, because star-grouped splitting changes the class mix. A baseline
+must be quoted against the split it is scored on. (The 0.63 figure itself does not
+reproduce either -- one column scores 0.70 at any threshold between 0.25 and 0.6.)
+
+**Why this belongs in this section.** It is the same failure mode as §10.7, §10.13 and
+the `koi_fpflag_*` case: no crash, no error, just a plausible number that happened to
+support the conclusion being argued for. The difference is that those three were bugs
+in code and this one was a bug in *experimental design* -- a comparison specified so
+that the preferred answer was the only reachable one.
+
+The general form, worth keeping: **when a baseline is a subset of the thing it is
+being compared against, the comparison cannot fail.** `duration_over_period` alone was
+a subset of the seven-feature model, so "the model beats the baseline" was true by
+construction. §11.4's decision to remove catalogue features from the model is what
+makes the two sets disjoint, and therefore what makes the comparison mean anything.
