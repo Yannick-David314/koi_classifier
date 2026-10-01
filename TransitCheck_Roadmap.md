@@ -17,8 +17,6 @@ communicating the result, not improving it.
 - [x] Chose the project, tied to real interests
 - [x] Reframed to an answerable question: can an ML pre-filter reduce human review burden for citizen-science transit vetting?
 - [x] Identified Planet Hunters TESS as the benchmark
-- [ ] Reach out to a faculty mentor *(still recommended)*
-- [ ] Read PHT's published methodology in full
 
 ## Phase 1 — Learn the tools on one star (Kepler-10) — ✅ complete
 - [x] Environment set up; pulled and plotted a real light curve
