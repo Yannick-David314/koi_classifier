@@ -1,5 +1,7 @@
 # TransitCheck
 
+*Repository: `koi_classifier`. TransitCheck is the project name.*
+
 Classifying Kepler Objects of Interest as **confirmed planets** or **false positives**
 from engineered light-curve features, using a gradient-boosted tree.
 
