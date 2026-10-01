@@ -7,7 +7,7 @@ plotted is the curve the features were measured from, not a lookalike.
 Run from the project root:
     .venv/bin/python scripts/make_preview_plot.py
 
-Writes social_preview.png (2400 x 1000 px, transparent) to the project root.
+Writes social_preview.png (2560 x 1280 px, transparent) to the project root.
 """
 import os
 import sys
@@ -45,7 +45,14 @@ PANELS = (
 # and GitHub's dark theme (#0d1117).
 TEXT_COLOUR = '#777670'
 
-FIG_WIDTH_IN, FIG_HEIGHT_IN, DPI = 12, 5, 200     # 2400 x 1000 px, 2.4 : 1
+# Exactly 2:1, GitHub's social preview shape, at twice its recommended 1280 x 640 so
+# it stays sharp when downscaled.
+FIG_WIDTH_IN, FIG_HEIGHT_IN, DPI = 12.8, 6.4, 200   # 2560 x 1280 px
+
+# LinkedIn previews the same image at 1.91:1, cropping it from the centre. That trims
+# (1 - 1.91/2) / 2 = 2.25% of the width off each side, so nothing may sit in the outer
+# SAFE_SIDE_FRACTION of either edge. 3.5% leaves a margin over the 2.25% crop.
+SAFE_SIDE_FRACTION = 0.035
 TICK_FONT_SIZE = 16
 AXIS_LABEL_FONT_SIZE = 18
 PANEL_LABEL_FONT_SIZE = 20
@@ -165,20 +172,39 @@ def draw_panel(ax, view, label, colour):
             color=TEXT_COLOUR, ha='left', va='bottom')
 
 
+def check_inside_safe_zone(fig):
+    """Stop if any label or data would be cut off by LinkedIn's 1.91:1 crop.
+
+    get_tightbbox measures the box around everything actually drawn -- axes, tick
+    labels, axis labels, panel labels -- so this catches a long label creeping
+    outward after a font-size or wording change, not just the margins set above.
+    """
+    fig.canvas.draw()
+    drawn = fig.get_tightbbox(fig.canvas.get_renderer())     # inches
+    left_fraction = drawn.x0 / FIG_WIDTH_IN
+    right_fraction = drawn.x1 / FIG_WIDTH_IN
+    print(f"content spans {left_fraction:.1%} to {right_fraction:.1%} of the width "
+          f"(must stay within {SAFE_SIDE_FRACTION:.1%} to {1 - SAFE_SIDE_FRACTION:.1%})")
+    if left_fraction < SAFE_SIDE_FRACTION or right_fraction > 1 - SAFE_SIDE_FRACTION:
+        raise RuntimeError("content reaches into the strip LinkedIn crops; widen the "
+                           "left/right margins in subplots_adjust")
+
+
 def main():
     catalogue = pd.read_csv(CATALOGUE_PATH)
 
     fig, axes = plt.subplots(1, 2, figsize=(FIG_WIDTH_IN, FIG_HEIGHT_IN))
     # Fixed margins instead of bbox_inches='tight', which would crop the canvas
-    # and break the exact 2400 x 1000 size.
+    # and break the exact 2560 x 1280 size.
     # The gap between panels has to hold the right panel's tick labels ("-80,000")
     # and its rotated axis label, hence the wide wspace.
-    fig.subplots_adjust(left=0.115, right=0.985, bottom=0.17, top=0.87, wspace=0.42)
+    fig.subplots_adjust(left=0.14, right=0.96, bottom=0.14, top=0.88, wspace=0.42)
 
     for ax, (kepoi_name, label, colour) in zip(axes, PANELS):
         row = catalogue.loc[catalogue['kepoi_name'] == kepoi_name].iloc[0]
         draw_panel(ax, local_view(row, catalogue), label, colour)
 
+    check_inside_safe_zone(fig)
     fig.savefig(OUTPUT_PATH, dpi=DPI, transparent=True)
     print(f"wrote {OUTPUT_PATH}")
 
