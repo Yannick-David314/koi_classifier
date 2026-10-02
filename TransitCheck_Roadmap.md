@@ -1,15 +1,20 @@
 # TransitCheck — Roadmap & Status
 
-*Updated after training on the 2,000-star dataset.*
+*Updated after restricting the model to six light-curve features (CLAUDE.md §11).*
 
 ## You are here: Phase 3 core complete.
 
 You have a trained, honestly-evaluated model. What remains in Phase 3 is
 communicating the result, not improving it.
 
-**Final result:** 0.88 recall, 0.66 precision on CONFIRMED planets, threshold
-0.25, on a star-grouped held-out test set of 434 rows.
-117 of 133 real planets found · 16 missed · 61 false alarms.
+**Final result (six light-curve features):** 0.80 recall, 0.58 precision on
+CONFIRMED planets, threshold 0.25, on a star-grouped held-out test set of 434 rows.
+106 of 133 real planets found · 27 missed · 78 false alarms · ROC AUC 0.856.
+Reproduced from the saved model on 2026-10-01 under Python 3.14 / scikit-learn 1.9.0.
+
+*(The previous figures here -- 0.88 recall, 0.66 precision, 117 of 133 found -- came
+from the seven-feature model that included `duration_over_period`, a catalogue
+quantity. See §11 of CLAUDE.md for why it was removed.)*
 
 ---
 
@@ -40,7 +45,9 @@ communicating the result, not improving it.
 - [x] Threshold chosen on a validation split, not on test
 - [x] Precision/recall reported, not accuracy
 - [x] Permutation importances computed on the test set
-- [x] **Catalogue-only baseline run** — geometry alone scores 0.63 accuracy (base rate 0.64); the light-curve pipeline carries the performance
+- [x] ~~**Catalogue-only baseline run** — geometry alone scores 0.63 accuracy (base rate 0.64); the light-curve pipeline carries the performance~~ — **wrong**: that baseline was one column, a subset of the model it was compared against (CLAUDE.md §11.6)
+- [x] **Feature-set ablation** over 25 star-grouped splits: light-curve only 0.7825, catalogue only (2 columns) 0.7748 — statistically indistinguishable; together 0.8959
+- [x] Model restricted to the six light-curve features, so the comparison above is genuine
 - [x] Model and notebook saved
 - [ ] Benchmark against Planet Hunters TESS's published precision/recall
 - [ ] Document methodology and limitations
@@ -52,20 +59,24 @@ communicating the result, not improving it.
 | More features (`koi_impact`) | Within noise (±3 pts) |
 | Hyperparameter tuning | CV 0.8806 vs 0.8754 default — not adopted |
 
+*These were tested on the earlier seven-feature model, before `duration_over_period`
+was removed. They have not been re-run on the six-feature model.*
+
 Three independent signals that the model isn't underfit or starved. It extracts
 close to all the signal these seven features contain. Further gains would need a
 different *kind* of feature, not more of the same.
 
-### Feature importances (2,224 rows, test set)
+### Feature importances (six-feature model, test set)
 ```
-duration_over_period   +0.1248 ± 0.0138
-secondary_depth        +0.0620 ± 0.0099
-snr                    +0.0446 ± 0.0110
-depth                  +0.0225 ± 0.0099
-width                  +0.0185 ± 0.0060
-odd_even_diff          +0.0158 ± 0.0118
-asymmetry              +0.0066 ± 0.0090
+depth                  +0.0627 ± 0.0154
+secondary_depth        +0.0541 ± 0.0130
+snr                    +0.0300 ± 0.0142
+odd_even_diff          +0.0190 ± 0.0122
+width                  +0.0185 ± 0.0156
+asymmetry              +0.0043 ± 0.0129
 ```
+With `duration_over_period` gone, `depth` takes the top spot. `asymmetry` stays
+within noise of zero, consistent with the finding below.
 
 ### Findings worth reporting
 - **`asymmetry` is not measurable at Kepler noise levels.** Flat at 1,118 rows, still flat at 2,224. Relative asymmetry tracks SNR near-monotonically — it measures noise, not geometry. A real negative result.

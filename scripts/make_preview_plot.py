@@ -289,7 +289,7 @@ def make_full_figure(views):
     # and break the exact 2560 x 1280 size.
     # The gap between panels has to hold the right panel's tick labels ("-80,000")
     # and its rotated axis label, hence the wide wspace.
-    fig.subplots_adjust(left=0.14, right=0.96, bottom=0.14, top=0.88, wspace=0.42)
+    fig.subplots_adjust(left=0.14, right=0.95, bottom=0.14, top=0.88, wspace=0.42)
 
     for ax, panel, view in zip(axes, PANELS, views):
         low, high = draw_points(ax, view, panel['colour'])

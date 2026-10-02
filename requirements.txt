@@ -1,0 +1,25 @@
+# Python 3.14 (matches the Windows machine the model was trained on).
+#
+# Rebuild the environment with:
+#   python3.14 -m venv .venv
+#   .venv/bin/pip install -r requirements.txt          (macOS)
+#   .venv\Scripts\pip install -r requirements.txt      (Windows)
+
+# Pinned exactly: transitcheck_model.joblib is a pickle, and pickles only load
+# reliably under the scikit-learn version that wrote them.
+scikit-learn==1.9.0
+
+# The pipeline (transitcheck_features.py)
+lightkurve
+astropy
+numpy
+pandas
+
+# Saving and loading the model
+joblib
+
+# Plots (scripts/make_preview_plot.py, the notebooks)
+matplotlib
+
+# Lets Jupyter / VS Code run the notebooks with this environment
+ipykernel
