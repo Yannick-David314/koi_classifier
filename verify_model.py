@@ -1,9 +1,9 @@
 """Reproduce the notebook's training run and check the recorded results.
 
-The notebook saves output for the headline metrics but not for three claims: the
-grid search, the catalogue-only baseline, and the 1000-vs-2000 comparison (those
-cells are commented out). This re-runs everything from the same CSV with the same
-random states, so every number in the writeup is backed by something reproducible.
+Retrains the six-feature model from the same CSV with the same random states and
+checks the split, the headline metrics, the base rates, and the 1000-vs-2000
+comparison. The light-curve vs catalogue comparison is not re-checked here: it is
+reproduced over 25 star-grouped splits by ablate_features.py (CLAUDE.md section 11).
 
     python verify_model.py
 """
@@ -15,7 +15,7 @@ from sklearn.model_selection import GroupShuffleSplit
 from sklearn.metrics import classification_report, confusion_matrix
 
 FEATURES = ['depth', 'width', 'asymmetry', 'snr',
-            'odd_even_diff', 'secondary_depth', 'duration_over_period']
+            'odd_even_diff', 'secondary_depth']
 THRESHOLD = 0.25
 
 
@@ -60,8 +60,8 @@ print(classification_report(y_test, pred,
                             target_names=['FALSE POSITIVE', 'CONFIRMED'], digits=2))
 cm = confusion_matrix(y_test, pred)
 print(cm)
-print(f"\nrecorded: [[240 61] [16 117]]   reproduced: [[{cm[0,0]} {cm[0,1]}] [{cm[1,0]} {cm[1,1]}]]")
-print(f"match: {cm.tolist() == [[240, 61], [16, 117]]}")
+print(f"\nrecorded: [[223 78] [27 106]]   reproduced: [[{cm[0,0]} {cm[0,1]}] [{cm[1,0]} {cm[1,1]}]]")
+print(f"match: {cm.tolist() == [[223, 78], [27, 106]]}")
 
 rule("3. BASE RATES — which one is the right comparison?")
 overall_fp = float((y == 0).mean())
@@ -73,18 +73,11 @@ print(f"model accuracy                      : {(pred == y_test).mean():.4f}")
 print("\nStar-grouped splitting means the test set's class mix differs from the")
 print("whole dataset's. A baseline must be quoted against the split it is scored on.")
 
-rule("4. CATALOGUE-ONLY BASELINE — duration_over_period alone")
-for cols, label in (
-    (['duration_over_period'], 'duration_over_period only'),
-    (FEATURES, 'all seven features'),
-):
-    p = fit_predict(X, y, train_idx, test_idx, features=cols)
-    acc = (p == y_test).mean()
-    tn, fp_, fn, tp = confusion_matrix(y_test, p).ravel()
-    rec = tp / (tp + fn) if (tp + fn) else 0
-    pre = tp / (tp + fp_) if (tp + fp_) else 0
-    print(f"  {label:<28} accuracy {acc:.4f}   CONFIRMED precision {pre:.2f} recall {rec:.2f}")
-print(f"  {'always say FALSE POSITIVE':<28} accuracy {test_fp:.4f}   CONFIRMED precision 0.00 recall 0.00")
+rule("4. LIGHT-CURVE vs CATALOGUE — see ablate_features.py")
+print("Not re-checked here. The earlier one-column baseline (duration_over_period")
+print("alone) was a subset of the model it was compared against, so it could not")
+print("fail (CLAUDE.md 11.6). The honest comparison runs over 25 star-grouped")
+print("splits in ablate_features.py, which produces the README's numbers.")
 
 rule("5. DOES DOUBLING THE DATA HELP? — 1000 vs 2000 stars")
 X1, y1, g1 = load('features_1000.csv')
@@ -99,22 +92,3 @@ print(f"  2000-star table: {len(X)} rows, test {len(test_idx)}   "
       f"accuracy {(pred == y_test).mean():.4f}  "
       f"CONFIRMED precision {tp / (tp + fp_):.2f} recall {tp / (tp + fn):.2f}")
 print("\n  NOTE: different test sets, so this is indicative, not a controlled comparison.")
-
-rule("6. DOES koi_impact HELP?")
-cat = pd.read_csv('MyProject_sync.csv', low_memory=False)
-full = pd.read_csv('features_2000.csv').drop_duplicates(subset='kepoi_name', keep='last')
-full = full[full['error'].isna()].merge(
-    cat[['kepoi_name', 'koi_impact']], on='kepoi_name', how='left')
-Xi = full[FEATURES + ['koi_impact']]
-yi = (full['disposition'] == 'CONFIRMED').astype(int)
-gi = full['kepid']
-tri, tei = split(Xi, yi, gi)
-pi = fit_predict(Xi, yi, tri, tei, features=FEATURES + ['koi_impact'])
-tn, fp_, fn, tp = confusion_matrix(yi.iloc[tei], pi).ravel()
-print(f"  with koi_impact   : accuracy {(pi == yi.iloc[tei]).mean():.4f}  "
-      f"CONFIRMED precision {tp / (tp + fp_):.2f} recall {tp / (tp + fn):.2f}  "
-      f"({int(full['koi_impact'].isna().sum())} rows missing koi_impact)")
-tn, fp_, fn, tp = cm.ravel()
-print(f"  without           : accuracy {(pred == y_test).mean():.4f}  "
-      f"CONFIRMED precision {tp / (tp + fp_):.2f} recall {tp / (tp + fn):.2f}")
-print()
