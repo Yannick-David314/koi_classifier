@@ -103,7 +103,7 @@ table, included so the pipeline runs without a separate download.
 
 ---
 
-## Honest limitations
+## Limitations
 
 - **`asymmetry` carries no measurable signal** — importance +0.0043 ± 0.0129, smaller
   than its own uncertainty, and flat from 1,118 rows to 2,224. Transit asymmetry is
