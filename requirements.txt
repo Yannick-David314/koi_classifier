@@ -23,3 +23,7 @@ matplotlib
 
 # Lets Jupyter / VS Code run the notebooks with this environment
 ipykernel
+
+# Database (Neon / Postgres)
+psycopg[binary]
+python-dotenv

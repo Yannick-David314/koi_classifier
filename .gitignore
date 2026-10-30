@@ -24,3 +24,4 @@ candfix_rows.csv
 .DS_Store
 Thumbs.db
 desktop.ini
+.env

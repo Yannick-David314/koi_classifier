@@ -16,9 +16,7 @@ cand_results = bundle['model'].predict_proba(cand_features)
 
 candidates['score'] = cand_results[:, 1]
 candidates = candidates.sort_values('score', ascending=False)
-ranked_cands = candidates[['kepoi_name', 'score']]
-
-ranked_cands.to_csv('ranked_cands.csv', index=False)
+candidates.to_csv('scored_candidates.csv', index=False)
 
 
 
