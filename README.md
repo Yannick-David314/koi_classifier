@@ -16,7 +16,7 @@ pre-filter can **reduce the human review burden** in citizen-science transit vet
 On a held-out test set of **434 KOIs**, split by star so no star appears in both
 training and test:
 
-The model uses **six light-curve features only** — no quantity from the catalogue's
+The model uses **six light-curve features only**. No quantity from the catalogue's
 transit-model fit reaches the classifier.
 
 | class | precision | recall |
@@ -27,10 +27,10 @@ transit-model fit reaches the classifier.
 **106 of 133 real planets found. 27 missed. 78 false alarms.** ROC AUC 0.856 on this
 split, 0.876 ± 0.012 across 25 further star-grouped splits.
 
-Read as a review filter — the framing that matches the question:
+Read as a review filter:
 
 > Of 434 KOIs, the model auto-rejects **250 (58% of the queue)** and loses
-> **27 of 133 real planets (20%)** in doing so. A human reviews the remaining 184.
+> **27 of 133 real planets (20%)** in doing so. A human can review the remaining 184.
 
 ### The result that matters more than the classifier
 
@@ -105,14 +105,14 @@ table, included so the pipeline runs without a separate download.
 
 ## Limitations
 
-- **`asymmetry` carries no measurable signal** — importance +0.0043 ± 0.0129, smaller
-  than its own uncertainty, and flat from 1,118 rows to 2,224. Transit asymmetry is
+- **`asymmetry` carries no measurable signal** (importance +0.0043 ± 0.0129, smaller
+  than its own uncertainty, and flat from 1,118 rows to 2,224). Transit asymmetry is
   not measurable at Kepler noise levels with this method. Kept and reported as a
   negative result.
 - **Measured depth runs 8.8% shallow** against the catalogue, stably. Definitional
   (median of binned flux vs the minimum of a fitted model), uniform, and invisible to
   a tree. Diagnosed and deliberately not corrected.
-- **2,289 of 7,587 available rows used** — extraction is download-bound. Doubling from
+- **2,289 of 7,587 available rows used**. Extraction is download-bound. Doubling from
   1,000 to 2,000 stars moved accuracy by +0.003, which is the main evidence that the
   sample is not badly unrepresentative.
 - **Light-curve features alone are not better than the catalogue.** See the ablation
@@ -121,4 +121,4 @@ table, included so the pipeline runs without a separate download.
 
 [METHODOLOGY.md §9](METHODOLOGY.md) documents three development bugs that each
 produced a *plausible number correlated with the label* rather than crashing. That
-section is the most transferable thing in this repository.
+section is the most transferable part of this repository.
